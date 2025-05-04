@@ -20,29 +20,28 @@ dic_words_hint = {'panda':
                   'ant':
                   ['เจอตัวเล็กๆ ในชีวิตประจำวัน','ทำงานหนักโดยไม่บ่น','โครงสร้างสังคมเป็นระเบียบมาก']}
 
-#function if lives equal one 
-# ตอนที่พลังชีวิตเหลือเท่ากับ 1 ให้บอกว่านี่โอกาสสุดท้ายแล้วนะ
-def lives_1(lives) :
-    if lives == 1 :
-        print('เลือดเหลือ 1 แล้วนะะ')
-        lives = lives - 1 
-        return lives
-
 #function สำหรับรับคำขอและแสดงคำใบ้
-def hint(secret_word,dic_words_hint) :
+def hint(secret_word,dic_words_hint,hint_list) :
     while True :
         input_player = input("อยากได้คำใบ้ไหม'\n อยากได้พิมพ์ 'อยาก' ไม่อยากได้พิมพ์ 'ไม่อยาก'\n")
-        if input_player == 'อยาก' or input_player == "'อยาก'" :
-            random.shuffle(dic_words_hint[secret_word])
-            hint = dic_words_hint[secret_word].pop()
+        #ถ้าผู้เล่นพิมพ์ว่า อยาก และยังมีคำใบ้เหลืออยู่ สุ่มคำใบ้ที่เหลือ จากนั้นให้แสดงคำใบ้
+        if (input_player == 'อยาก' or input_player == "'อยาก'") and len(hint_list) != 0:
+            random.shuffle(hint_list) #สุ่มคำใบ้
+            hint = hint_list.pop() #เอาคำใบ้ออกมา
             print('รับคำใบ้ไปเลยย\nคำใบ้คืออ ' + hint )
             break
-        else :
-            if input_player == "ไม่อยาก" or input_player == "'ไม่อยาก'" :
+        #ถ้าพิม์ว่า ไม่อยาก ให้แสดงผลลพธ์อีกแบบ
+        elif input_player == "ไม่อยาก" or input_player == "'ไม่อยาก'" :
                 print('ไม่อยากได้ก็ตามใจ เราไม่ง้อหรอก')
                 break
-            else :
+        #กรณีพิมพ์ผิด
+        elif len(hint_list) != 0 :
                 print('เหมือนคุณจะพิมพ์ผิดนะ\nพิมพ์ใหม่อีกครั้งสิ')
+        else :
+             print('คำใบ้หมดแล้วล่ะ เสียใจด้วยนะ')    #บอกเมื่อไม่มีคำใบ้เหลืออยู่ในlist hint แล้ว
+             break
+
+    return hint_list #คืนค่า hint_list เพื่อ update hint ที่เหลืออยู๋นะปัจจุบัน
 
 #เรียกใช้ key จาก dic_words_hint เพื่อเอามาสุ่มคำ
 words = list(dic_words_hint.keys())
@@ -54,12 +53,17 @@ while len(words) > 0 and lives > 0 :
     secret_word = words.pop()   #นำคำใน words ออกมา 1 คำ แทนค่าใน secret_words
     clue = list('?'*len(secret_word))   #กำหนดลิสของเบาะแสมาให้มีความยาวเท่ากับ secret_words
 
+    #กำหนด list สำหรับคำใบ้ -> hint_list
+    hint_list = dic_words_hint[secret_word]
+
     #รับตัวอักษรที่ผู้เล่นทายจากนั้น check ว่าตรงกับ secret_words หรือไม่
     while True :
 
-        lives_1(lives)
-        print(clue)    #แสดงลิสของเบาะแส เช่น ['?','?','?']
+        #ถ้าพลังชีวิตเป็น 1 ให้กดดันว่าเลือดเหลือ 1 แล้วนะะ
+        if lives == 1 :
+             print('เลือดเหลือ 1 แล้วนะะ') 
 
+        print(clue)    #แสดงลิสของเบาะแส เช่น ['?','?','?']
         #นำ input ของผู้เล่นมาตรวจสอบ
         guess = input('ทายตัวอักษรมาสิ : ')
         for i in range(len(secret_word)):
@@ -76,28 +80,25 @@ while len(words) > 0 and lives > 0 :
                 score = score + 1
                 print('score : ' + str(score))
                 break
-        else :
-            #ถ้าผิดให้เลือดลด แต่พลังชีวิตยังมากกว่า 0
-            if lives > 0 :
+        elif lives > 0 :
+            #ถ้าผิดให้เลือดลด กรณีพลังชีวิตยังมากกว่า 0 lives > 0 :
                 lives = lives - 1
                 print('lives : ' + str(lives))
             #ถ้าพลังชีวิตเป็น 0 ให้ผู้เล่นแพ้แล้ว ไปที่จบเกม
                 if lives == 0 :
-                    #พลังชีวิตหมด คือแพ้แล้ว
-                    print('หมดโอกาสแล้วล่ะ')
-                    hint(secret_word,dic_words_hint)#ตอบผิดแล้วสามารถขอคำใบ้ได้
+            #พลังชีวิตหมด คือแพ้แล้ว
+                    print('หมดโอกาสแล้วล่ะ\nคุณแพ้แล้ว')
                     break
                 else :
                     print('คุณตอบผิดนะ ลองใหม่อีกรอบนะ')
-                    hint(secret_word,dic_words_hint)#ตอบผิดแล้วสามารถขอคำใบ้ได้
+                    hint(secret_word,dic_words_hint,hint_list)#ตอบผิดแล้วสามารถขอคำใบ้ได้
 
 #จบเกม 
 #จบแบบชนะจะขึ้นไม่เหมือนกับตอนแพ้
 if len(words) == 0 and lives == 3 :
     print('เก่งเกินนน ทายไม่ผิดสักตัวอักษรเลยย')
     print('คุณชนะแล้วล่ะ')
-else :
-    if len(words) == 0 and lives > 0 :
+elif len(words) == 0 and lives > 0 :
         print('เก่งมากเลย ไม่เหลือคำให้คุณทายแล้วล่ะ')
         print('คุณชนะแล้ว')
 
